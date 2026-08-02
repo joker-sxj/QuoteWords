@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as image;
 import 'package:quoteimage_mobile/core/ble/quote_protocol.dart';
+import 'package:quoteimage_mobile/core/devices/paired_device_store.dart';
 import 'package:quoteimage_mobile/core/image/epaper_image_processor.dart';
 import 'package:quoteimage_mobile/features/words/data/study_reminder.dart';
 import 'package:quoteimage_mobile/features/words/data/study_settings_store.dart';
@@ -28,16 +29,39 @@ class RecordingStudyReminder implements StudyReminder {
   Future<void> schedule(StudySettings settings) async => scheduled = settings;
 }
 
+class EmptyDeviceStore implements DeviceStore {
+  @override
+  Future<void> deleteCredential(String mac) async {}
+
+  @override
+  Future<Uint8List?> loadCredential(String mac) async => null;
+
+  @override
+  Future<List<PairedDevice>> loadDevices() async => const [];
+
+  @override
+  Future<String?> loadLastSelectedMac() async => null;
+
+  @override
+  Future<void> remove(String mac) async {}
+
+  @override
+  Future<void> saveCredential(String mac, Uint8List credential) async {}
+
+  @override
+  Future<void> select(String? mac) async {}
+
+  @override
+  Future<void> upsert(PairedDevice device) async {}
+}
+
 Future<ProcessedImage> fakeWordCardRender(WordCardContent content) async {
   final preview = image.Image(width: 296, height: 152, numChannels: 3)
     ..clear(image.ColorRgb8(255, 255, 255));
   return ProcessedImage(
     previewPng: Uint8List.fromList(image.encodePng(preview)),
-    frame: Uint8List(QuoteProtocol.frameSize)..fillRange(
-      0,
-      QuoteProtocol.frameSize,
-      0xff,
-    ),
+    frame: Uint8List(QuoteProtocol.frameSize)
+      ..fillRange(0, QuoteProtocol.frameSize, 0xff),
   );
 }
 
@@ -50,6 +74,7 @@ void main() {
       QuoteImageApp(
         studySettingsStore: settings,
         studyReminder: reminder,
+        deviceStore: EmptyDeviceStore(),
         wordCardRender: fakeWordCardRender,
       ),
     );
@@ -77,11 +102,14 @@ void main() {
     expect(reminder.scheduled?.newWordsPerDay, 9);
   });
 
-  testWidgets('image workflow remains separate from word study', (tester) async {
+  testWidgets('image workflow remains separate from word study', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       QuoteImageApp(
         initialSection: HomeSection.image,
         wordCardRender: fakeWordCardRender,
+        deviceStore: EmptyDeviceStore(),
       ),
     );
     await tester.pump();

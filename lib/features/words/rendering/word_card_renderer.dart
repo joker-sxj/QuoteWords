@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import '../../../core/image/epaper_image_processor.dart';
 import '../domain/word_card.dart';
 
+typedef WordCardRender =
+    Future<ProcessedImage> Function(WordCardContent content);
+
 class WordCardLayout {
   const WordCardLayout({
     required this.wordFontSize,

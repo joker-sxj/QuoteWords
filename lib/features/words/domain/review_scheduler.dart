@@ -41,11 +41,7 @@ class ReviewScheduler {
     Duration(days: 30),
   ];
 
-  WordProgress rate(
-    WordProgress progress,
-    RecallRating rating,
-    DateTime now,
-  ) {
+  WordProgress rate(WordProgress progress, RecallRating rating, DateTime now) {
     if (rating == RecallRating.forgotten) {
       return progress.copyWith(
         step: 1,
@@ -58,9 +54,7 @@ class ReviewScheduler {
     final nextStep = (progress.step + advance).clamp(1, intervals.length);
     var interval = intervals[nextStep - 1];
     if (rating == RecallRating.hard) {
-      interval = Duration(
-        milliseconds: (interval.inMilliseconds / 2).round(),
-      );
+      interval = Duration(milliseconds: (interval.inMilliseconds / 2).round());
       if (interval < intervals.first) interval = intervals.first;
     }
     return progress.copyWith(step: nextStep, dueAt: now.add(interval));
@@ -68,11 +62,9 @@ class ReviewScheduler {
 }
 
 class StudyCandidate {
-  const StudyCandidate.newWord({
-    required this.wordId,
-    required this.frequency,
-  }) : isNew = true,
-       dueAt = null;
+  const StudyCandidate.newWord({required this.wordId, required this.frequency})
+    : isNew = true,
+      dueAt = null;
 
   const StudyCandidate.review({required this.wordId, required this.dueAt})
     : isNew = false,

@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'core/ble/quote_ble_client.dart';
 import 'core/devices/paired_device_store.dart';
 import 'features/editor/editor_screen.dart';
+import 'features/words/data/study_reminder.dart';
+import 'features/words/data/study_settings_store.dart';
+import 'features/words/rendering/word_card_renderer.dart';
+import 'features/words/word_study_screen.dart';
+
+enum HomeSection { words, image }
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,10 +16,22 @@ void main() {
 }
 
 class QuoteImageApp extends StatelessWidget {
-  const QuoteImageApp({super.key, this.bleClient, this.deviceStore});
+  const QuoteImageApp({
+    super.key,
+    this.bleClient,
+    this.deviceStore,
+    this.studySettingsStore,
+    this.studyReminder,
+    this.wordCardRender,
+    this.initialSection = HomeSection.words,
+  });
 
   final QuoteBleClient? bleClient;
   final DeviceStore? deviceStore;
+  final StudySettingsStore? studySettingsStore;
+  final StudyReminder? studyReminder;
+  final WordCardRender? wordCardRender;
+  final HomeSection initialSection;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +92,78 @@ class QuoteImageApp extends StatelessWidget {
           ),
         ),
       ),
-      home: EditorScreen(bleClient: bleClient, deviceStore: deviceStore),
+      home: _QuoteHome(
+        bleClient: bleClient ?? QuoteBleClient(),
+        deviceStore: deviceStore ?? PersistentDeviceStore(),
+        studySettingsStore:
+            studySettingsStore ?? PersistentStudySettingsStore(),
+        studyReminder: studyReminder ?? LocalStudyReminder(),
+        wordCardRender: wordCardRender ?? renderWordCard,
+        initialSection: initialSection,
+      ),
+    );
+  }
+}
+
+class _QuoteHome extends StatefulWidget {
+  const _QuoteHome({
+    required this.bleClient,
+    required this.deviceStore,
+    required this.studySettingsStore,
+    required this.studyReminder,
+    required this.wordCardRender,
+    required this.initialSection,
+  });
+
+  final QuoteBleClient bleClient;
+  final DeviceStore deviceStore;
+  final StudySettingsStore studySettingsStore;
+  final StudyReminder studyReminder;
+  final WordCardRender wordCardRender;
+  final HomeSection initialSection;
+
+  @override
+  State<_QuoteHome> createState() => _QuoteHomeState();
+}
+
+class _QuoteHomeState extends State<_QuoteHome> {
+  late HomeSection _section = widget.initialSection;
+
+  @override
+  Widget build(BuildContext context) {
+    final page = switch (_section) {
+      HomeSection.words => WordStudyScreen(
+        bleClient: widget.bleClient,
+        deviceStore: widget.deviceStore,
+        settingsStore: widget.studySettingsStore,
+        reminder: widget.studyReminder,
+        cardRender: widget.wordCardRender,
+      ),
+      HomeSection.image => EditorScreen(
+        bleClient: widget.bleClient,
+        deviceStore: widget.deviceStore,
+      ),
+    };
+    return Scaffold(
+      body: page,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _section.index,
+        onDestinationSelected: (index) {
+          setState(() => _section = HomeSection.values[index]);
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.school_outlined),
+            selectedIcon: Icon(Icons.school),
+            label: '词卡',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.image_outlined),
+            selectedIcon: Icon(Icons.image),
+            label: '图片',
+          ),
+        ],
+      ),
     );
   }
 }
