@@ -44,32 +44,35 @@ class MemoryStudyStateStore implements StudyStateStore {
 void main() {
   final now = DateTime.utc(2026, 8, 2, 9);
 
-  test('builds a fixed daily queue with due reviews before new words', () async {
-    final store = MemoryStudyStateStore()
-      ..value = StudyState(
-        progress: {
-          'review': WordProgress(
-            wordId: 'review',
-            step: 3,
-            dueAt: now.subtract(const Duration(minutes: 1)),
-            lapses: 0,
-          ),
-        },
+  test(
+    'builds a fixed daily queue with due reviews before new words',
+    () async {
+      final store = MemoryStudyStateStore()
+        ..value = StudyState(
+          progress: {
+            'review': WordProgress(
+              wordId: 'review',
+              step: 3,
+              dueAt: now.subtract(const Duration(minutes: 1)),
+              lapses: 0,
+            ),
+          },
+        );
+      final session = StudySession(
+        words: const [lowerWord, highWord, reviewWord],
+        store: store,
+        settings: const StudySettings(newWordsPerDay: 1, dailyLimit: 2),
+        now: () => now,
       );
-    final session = StudySession(
-      words: const [lowerWord, highWord, reviewWord],
-      store: store,
-      settings: const StudySettings(newWordsPerDay: 1, dailyLimit: 2),
-      now: () => now,
-    );
 
-    await session.load();
+      await session.load();
 
-    expect(session.queue.map((word) => word.id), ['review', 'high']);
-    expect(session.current?.id, 'review');
-    expect(store.value.sessionDate, '2026-08-02');
-    expect(store.value.sessionWordIds, ['review', 'high']);
-  });
+      expect(session.queue.map((word) => word.id), ['review', 'high']);
+      expect(session.current?.id, 'review');
+      expect(store.value.sessionDate, '2026-08-02');
+      expect(store.value.sessionWordIds, ['review', 'high']);
+    },
+  );
 
   test('rating persists the interval and resumes at the next word', () async {
     final store = MemoryStudyStateStore();
@@ -129,4 +132,28 @@ void main() {
     expect(session.current?.id, 'review');
     expect(store.value.sessionDate, '2026-08-02');
   });
+
+  test(
+    'increasing new words extends today without resetting progress',
+    () async {
+      final store = MemoryStudyStateStore();
+      final session = StudySession(
+        words: const [highWord, lowerWord],
+        store: store,
+        settings: const StudySettings(newWordsPerDay: 1, dailyLimit: 2),
+        now: () => now,
+      );
+      await session.load();
+      await session.rate(RecallRating.good);
+
+      await session.updateSettings(
+        const StudySettings(newWordsPerDay: 2, dailyLimit: 2),
+      );
+
+      expect(session.queue.map((word) => word.id), ['high', 'lower']);
+      expect(session.current?.id, 'lower');
+      expect(store.value.currentIndex, 1);
+      expect(store.value.sessionWordIds, ['high', 'lower']);
+    },
+  );
 }

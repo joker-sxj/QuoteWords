@@ -194,6 +194,44 @@ void main() {
     expect(find.text('使用内置词卡'), findsOneWidget);
   });
 
+  testWidgets('increasing new words adds more cards to today', (tester) async {
+    final rendered = <WordCardContent>[];
+
+    await tester.pumpWidget(
+      QuoteImageApp(
+        vocabularyCatalog: FixedVocabularyCatalog(const [
+          allocateWord,
+          depositWord,
+        ]),
+        studyStateStore: MemoryStudyStateStore(),
+        studySettingsStore: MemoryStudySettingsStore()
+          ..value = const StudySettings(newWordsPerDay: 1),
+        studyReminder: RecordingStudyReminder(),
+        deviceStore: EmptyDeviceStore(),
+        wordCardRender: (content) async {
+          rendered.add(content);
+          return fakeWordCardRender(content);
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('认识'));
+    await tester.tap(find.text('认识'));
+    await tester.pumpAndSettle();
+    expect(find.text('今日学习已完成'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('学习设置'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('增加每日新词'));
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+
+    expect(rendered.last.word, 'deposit');
+    expect(rendered.last.position, 2);
+    expect(rendered.last.total, 2);
+  });
+
   testWidgets('image workflow remains separate from word study', (
     tester,
   ) async {
