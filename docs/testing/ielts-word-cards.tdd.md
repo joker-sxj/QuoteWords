@@ -34,6 +34,7 @@ decisions agreed for the Android client:
 | Synchronized words rendered and ratings persisted through UI | `2c4751a` | `4c38582` | `flutter test test/word_study_screen_test.dart test/study_session_test.dart test/study_state_store_test.dart` |
 | Same-day additional study | `7f76084` | `3cac17f` | `flutter test test/study_session_test.dart test/word_study_screen_test.dart test/review_scheduler_test.dart` |
 | Standalone QuoteWords identity | `6321cd6` | `5ee73a7` | `flutter test test/project_identity_test.dart` |
+| Hard 24-card daily ceiling | `4705ade` | `24aa1da` | `flutter test test/study_settings_test.dart` |
 
 Each RED test failed for the intended missing type, method, or behavior before
 its paired production commit. The checkpoint commits remain reachable from
