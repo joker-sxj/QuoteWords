@@ -7,9 +7,7 @@ import 'package:quoteimage_mobile/features/words/rendering/word_card_renderer.da
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('renders a crisp Quote/0 frame at the physical card size', (
-    tester,
-  ) async {
+  test('renders a crisp Quote/0 frame at the physical card size', () async {
     const content = WordCardContent(
       word: 'deposit',
       phonetic: '/dɪˈpɒzɪt/',
@@ -29,7 +27,7 @@ void main() {
     expect(rendered.frame.toSet().length, greaterThan(1));
   });
 
-  testWidgets('long words fit without truncation or overflow', (tester) async {
+  test('long words fit without truncation or overflow', () {
     const content = WordCardContent(
       word: 'electroencephalographically',
       phonetic: '/ɪˌlektrəʊensefələˈɡræfɪkli/',
