@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/core/ble/quote_protocol.dart';
+import 'package:quotewords/core/ble/quote_protocol.dart';
 
 void main() {
   test('CRC32 matches the standard check vector', () {

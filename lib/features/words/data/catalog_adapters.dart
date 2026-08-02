@@ -91,7 +91,7 @@ Future<String> downloadIsdcPage() async {
 }
 
 class AndroidBrotliDecoder {
-  static const _channel = MethodChannel('tech.undef.quoteimage/brotli');
+  static const _channel = MethodChannel('tech.undef.quotewords/brotli');
 
   Future<Uint8List> call(Uint8List bytes) async {
     if (!Platform.isAndroid) {

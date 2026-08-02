@@ -3,9 +3,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/data/catalog_adapters.dart';
-import 'package:quoteimage_mobile/features/words/data/isdc_catalog_parser.dart';
-import 'package:quoteimage_mobile/features/words/data/vocabulary_catalog.dart';
+import 'package:quotewords/features/words/data/catalog_adapters.dart';
+import 'package:quotewords/features/words/data/isdc_catalog_parser.dart';
+import 'package:quotewords/features/words/data/vocabulary_catalog.dart';
 
 void main() {
   test('JSON file cache round-trips only the minimal catalog', () async {

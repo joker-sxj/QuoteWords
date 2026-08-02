@@ -16,11 +16,11 @@ enum HomeSection { words, image }
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const QuoteImageApp());
+  runApp(const QuoteWordsApp());
 }
 
-class QuoteImageApp extends StatelessWidget {
-  const QuoteImageApp({
+class QuoteWordsApp extends StatelessWidget {
+  const QuoteWordsApp({
     super.key,
     this.bleClient,
     this.deviceStore,
@@ -55,7 +55,7 @@ class QuoteImageApp extends StatelessWidget {
       outline: Color(0xff747b73),
     );
     return MaterialApp(
-      title: 'QuoteImage',
+      title: 'QuoteWords',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: colors,

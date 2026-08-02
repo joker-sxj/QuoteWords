@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as image;
-import 'package:quoteimage_mobile/core/ble/quote_protocol.dart';
-import 'package:quoteimage_mobile/core/image/epaper_image_processor.dart';
+import 'package:quotewords/core/ble/quote_protocol.dart';
+import 'package:quotewords/core/image/epaper_image_processor.dart';
 
 Uint8List solidPng(int value) {
   final source = image.Image(width: 8, height: 8, numChannels: 3)

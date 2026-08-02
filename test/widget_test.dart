@@ -3,10 +3,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/core/ble/quote_ble_client.dart';
-import 'package:quoteimage_mobile/core/ble/quote_protocol.dart';
-import 'package:quoteimage_mobile/core/devices/paired_device_store.dart';
-import 'package:quoteimage_mobile/main.dart';
+import 'package:quotewords/core/ble/quote_ble_client.dart';
+import 'package:quotewords/core/ble/quote_protocol.dart';
+import 'package:quotewords/core/devices/paired_device_store.dart';
+import 'package:quotewords/main.dart';
 
 class MemoryDeviceStore implements DeviceStore {
   final List<PairedDevice> devices = [];
@@ -102,14 +102,14 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         deviceStore: MemoryDeviceStore(),
         initialSection: HomeSection.image,
       ),
     );
     await tester.pump();
 
-    expect(find.text('QuoteImage'), findsOneWidget);
+    expect(find.text('QuoteWords'), findsOneWidget);
     expect(find.text('尺寸适配'), findsOneWidget);
     expect(find.text('Atkinson'), findsOneWidget);
     expect(find.text('296 × 152'), findsOneWidget);
@@ -150,7 +150,7 @@ void main() {
       ..selectedMac = 'AA:BB:CC:DD:EE:01';
 
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         deviceStore: store,
         bleClient: OfflineBleClient(),
         initialSection: HomeSection.image,
@@ -175,7 +175,7 @@ void main() {
   ) async {
     final store = MemoryDeviceStore();
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         deviceStore: store,
         bleClient: PairingBleClient(),
         initialSection: HomeSection.image,

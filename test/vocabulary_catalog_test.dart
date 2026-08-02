@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/data/isdc_catalog_parser.dart';
-import 'package:quoteimage_mobile/features/words/data/vocabulary_catalog.dart';
+import 'package:quotewords/features/words/data/isdc_catalog_parser.dart';
+import 'package:quotewords/features/words/data/vocabulary_catalog.dart';
 
 const cachedWord = VocabularyWord(
   id: 'cached',
