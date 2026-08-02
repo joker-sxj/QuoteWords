@@ -73,7 +73,8 @@ tz.TZDateTime nextReminderTime(StudySettings settings, tz.TZDateTime now) {
     settings.reminderHour,
     settings.reminderMinute,
   );
-  if (!scheduled.isAfter(now))
+  if (!scheduled.isAfter(now)) {
     scheduled = scheduled.add(const Duration(days: 1));
+  }
   return scheduled;
 }
