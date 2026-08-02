@@ -6,8 +6,11 @@ import 'package:image/image.dart' as image;
 import 'package:quoteimage_mobile/core/ble/quote_protocol.dart';
 import 'package:quoteimage_mobile/core/devices/paired_device_store.dart';
 import 'package:quoteimage_mobile/core/image/epaper_image_processor.dart';
+import 'package:quoteimage_mobile/features/words/data/isdc_catalog_parser.dart';
 import 'package:quoteimage_mobile/features/words/data/study_reminder.dart';
+import 'package:quoteimage_mobile/features/words/data/study_session.dart';
 import 'package:quoteimage_mobile/features/words/data/study_settings_store.dart';
+import 'package:quoteimage_mobile/features/words/data/vocabulary_catalog.dart';
 import 'package:quoteimage_mobile/features/words/domain/study_settings.dart';
 import 'package:quoteimage_mobile/features/words/domain/word_card.dart';
 import 'package:quoteimage_mobile/main.dart';
@@ -27,6 +30,30 @@ class RecordingStudyReminder implements StudyReminder {
 
   @override
   Future<void> schedule(StudySettings settings) async => scheduled = settings;
+}
+
+class FixedVocabularyCatalog implements VocabularyCatalog {
+  FixedVocabularyCatalog(this.words);
+
+  final List<VocabularyWord> words;
+
+  @override
+  Future<List<VocabularyWord>> load() async => words;
+}
+
+class FailingVocabularyCatalog implements VocabularyCatalog {
+  @override
+  Future<List<VocabularyWord>> load() async => throw Exception('offline');
+}
+
+class MemoryStudyStateStore implements StudyStateStore {
+  StudyState value = const StudyState();
+
+  @override
+  Future<StudyState> load() async => value;
+
+  @override
+  Future<void> save(StudyState state) async => value = state;
 }
 
 class EmptyDeviceStore implements DeviceStore {
@@ -74,6 +101,8 @@ void main() {
       QuoteImageApp(
         studySettingsStore: settings,
         studyReminder: reminder,
+        vocabularyCatalog: FixedVocabularyCatalog(const [allocateWord]),
+        studyStateStore: MemoryStudyStateStore(),
         deviceStore: EmptyDeviceStore(),
         wordCardRender: fakeWordCardRender,
       ),
@@ -102,6 +131,67 @@ void main() {
     expect(reminder.scheduled?.newWordsPerDay, 9);
   });
 
+  testWidgets('synced words render and ratings persist before advancing', (
+    tester,
+  ) async {
+    final stateStore = MemoryStudyStateStore();
+    final rendered = <WordCardContent>[];
+
+    await tester.pumpWidget(
+      QuoteImageApp(
+        vocabularyCatalog: FixedVocabularyCatalog(const [
+          allocateWord,
+          depositWord,
+        ]),
+        studyStateStore: stateStore,
+        studySettingsStore: MemoryStudySettingsStore()
+          ..value = const StudySettings(newWordsPerDay: 2, dailyLimit: 2),
+        studyReminder: RecordingStudyReminder(),
+        deviceStore: EmptyDeviceStore(),
+        wordCardRender: (content) async {
+          rendered.add(content);
+          return fakeWordCardRender(content);
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(rendered.last.word, 'allocate');
+    expect(rendered.last.position, 1);
+    expect(rendered.last.total, 2);
+
+    await tester.tap(find.text('认识'));
+    await tester.pumpAndSettle();
+
+    expect(stateStore.value.progress['allocate']?.step, 1);
+    expect(stateStore.value.currentIndex, 1);
+    expect(rendered.last.word, 'deposit');
+    expect(rendered.last.position, 2);
+  });
+
+  testWidgets('first sync failure keeps the compact fallback card', (
+    tester,
+  ) async {
+    final rendered = <WordCardContent>[];
+
+    await tester.pumpWidget(
+      QuoteImageApp(
+        vocabularyCatalog: FailingVocabularyCatalog(),
+        studyStateStore: MemoryStudyStateStore(),
+        studyReminder: RecordingStudyReminder(),
+        deviceStore: EmptyDeviceStore(),
+        wordCardRender: (content) async {
+          rendered.add(content);
+          return fakeWordCardRender(content);
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(rendered.last.word, 'deposit');
+    expect(find.text('使用内置词卡'), findsOneWidget);
+  });
+
   testWidgets('image workflow remains separate from word study', (
     tester,
   ) async {
@@ -118,3 +208,21 @@ void main() {
     expect(find.text('今日词卡'), findsNothing);
   });
 }
+
+const allocateWord = VocabularyWord(
+  id: 'allocate',
+  word: 'allocate',
+  phonetic: '/ˈæləkeɪt/',
+  translation: 'v. 分配；划拨',
+  example: 'Allocate funds carefully.',
+  frequency: 68,
+);
+
+const depositWord = VocabularyWord(
+  id: 'deposit',
+  word: 'deposit',
+  phonetic: '/dɪˈpɒzɪt/',
+  translation: 'n. 押金；存款',
+  example: 'Pay a deposit to reserve it.',
+  frequency: 60,
+);
