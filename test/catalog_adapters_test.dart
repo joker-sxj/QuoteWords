@@ -40,53 +40,54 @@ void main() {
     expect(persisted, isNot(contains('trueExamples')));
   });
 
-  test('ISDC source downloads and parses words at frequency 40 or higher', () async {
-    final payload = jsonEncode({
-      'g': [
-        {
-          'ws': [
-            {
-              'w': 'allocate',
-              'p': 'ˈæləkeɪt',
-              't': 'v. 分配；划拨',
-              'e': 'Allocate funds carefully.',
-              'oc': 40,
-            },
-            {
-              'w': 'rare',
-              't': 'adj. 少见的',
-              'oc': 39,
-            },
-          ],
+  test(
+    'ISDC source downloads and parses words at frequency 40 or higher',
+    () async {
+      final payload = jsonEncode({
+        'g': [
+          {
+            'ws': [
+              {
+                'w': 'allocate',
+                'p': 'ˈæləkeɪt',
+                't': 'v. 分配；划拨',
+                'e': 'Allocate funds carefully.',
+                'oc': 40,
+              },
+              {'w': 'rare', 't': 'adj. 少见的', 'oc': 39},
+            ],
+          },
+        ],
+      });
+      final bytes = [...utf8.encode(payload)];
+      while (bytes.length % 4 != 0) {
+        bytes.add(0x20);
+      }
+      final page = '<script id="asp-data">${_base85(bytes)}</script>';
+      var requests = 0;
+      final source = IsdcVocabularyCatalogSource(
+        loadPage: () async {
+          requests++;
+          return page;
         },
-      ],
-    });
-    final bytes = [...utf8.encode(payload)];
-    while (bytes.length % 4 != 0) {
-      bytes.add(0x20);
-    }
-    final page = '<script id="asp-data">${_base85(bytes)}</script>';
-    var requests = 0;
-    final source = IsdcVocabularyCatalogSource(
-      loadPage: () async {
-        requests++;
-        return page;
-      },
-      decodeSegment: (data) async => Uint8List.fromList(data),
-    );
+        decodeSegment: (data) async => Uint8List.fromList(data),
+      );
 
-    final words = await source.fetch();
+      final words = await source.fetch();
 
-    expect(requests, 1);
-    expect(words.map((word) => word.id), ['allocate']);
-  });
+      expect(requests, 1);
+      expect(words.map((word) => word.id), ['allocate']);
+    },
+  );
 }
 
 String _base85(List<int> bytes) {
-  final alphabet = String.fromCharCodes([
-    for (var code = 33; code <= 126; code++)
-      if (code != 34 && code != 39 && code != 60) code,
-  ].take(85));
+  final alphabet = String.fromCharCodes(
+    [
+      for (var code = 33; code <= 126; code++)
+        if (code != 34 && code != 39 && code != 60) code,
+    ].take(85),
+  );
   final output = StringBuffer();
   for (var offset = 0; offset < bytes.length; offset += 4) {
     var value =
