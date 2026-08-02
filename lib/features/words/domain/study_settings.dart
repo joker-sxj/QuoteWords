@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 class StudySettings {
+  static const maxCardsPerDay = 24;
+
   const StudySettings({
     this.newWordsPerDay = 8,
     this.dailyLimit = 24,
@@ -21,9 +23,12 @@ class StudySettings {
   }) {
     final normalizedNewWords = (newWordsPerDay ?? this.newWordsPerDay).clamp(
       1,
-      40,
+      maxCardsPerDay,
     );
-    final requestedLimit = (dailyLimit ?? this.dailyLimit).clamp(1, 60);
+    final requestedLimit = (dailyLimit ?? this.dailyLimit).clamp(
+      1,
+      maxCardsPerDay,
+    );
     return StudySettings(
       newWordsPerDay: normalizedNewWords,
       dailyLimit: math.max(normalizedNewWords, requestedLimit),
