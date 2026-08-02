@@ -101,7 +101,12 @@ void main() {
   testWidgets('editor exposes the complete image-to-device workflow', (
     tester,
   ) async {
-    await tester.pumpWidget(QuoteImageApp(deviceStore: MemoryDeviceStore()));
+    await tester.pumpWidget(
+      QuoteImageApp(
+        deviceStore: MemoryDeviceStore(),
+        initialSection: HomeSection.image,
+      ),
+    );
     await tester.pump();
 
     expect(find.text('QuoteImage'), findsOneWidget);
@@ -145,7 +150,11 @@ void main() {
       ..selectedMac = 'AA:BB:CC:DD:EE:01';
 
     await tester.pumpWidget(
-      QuoteImageApp(deviceStore: store, bleClient: OfflineBleClient()),
+      QuoteImageApp(
+        deviceStore: store,
+        bleClient: OfflineBleClient(),
+        initialSection: HomeSection.image,
+      ),
     );
     await tester.pump();
     expect(find.text('书房'), findsOneWidget);
@@ -166,7 +175,11 @@ void main() {
   ) async {
     final store = MemoryDeviceStore();
     await tester.pumpWidget(
-      QuoteImageApp(deviceStore: store, bleClient: PairingBleClient()),
+      QuoteImageApp(
+        deviceStore: store,
+        bleClient: PairingBleClient(),
+        initialSection: HomeSection.image,
+      ),
     );
     await tester.pump();
 
