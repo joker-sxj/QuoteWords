@@ -50,7 +50,7 @@ class StudySession {
 
   final List<VocabularyWord> _words;
   final StudyStateStore _store;
-  final StudySettings _settings;
+  StudySettings _settings;
   final DateTime Function() _now;
   final ReviewScheduler _scheduler;
 
@@ -122,6 +122,36 @@ class StudySession {
     _state = _state.copyWith(
       progress: Map.unmodifiable(progress),
       currentIndex: _state.currentIndex + 1,
+    );
+    await _store.save(_state);
+  }
+
+  Future<void> updateSettings(StudySettings settings) async {
+    final additionalCount = settings.newWordsPerDay - _settings.newWordsPerDay;
+    _settings = settings;
+    final remainingCapacity = settings.dailyLimit - _queue.length;
+    if (additionalCount <= 0 || remainingCapacity <= 0) return;
+
+    final queuedIds = _queue.map((word) => word.id).toSet();
+    final candidates =
+        _words
+            .where(
+              (word) =>
+                  !queuedIds.contains(word.id) &&
+                  !_state.progress.containsKey(word.id),
+            )
+            .toList()
+          ..sort((left, right) {
+            final frequency = right.frequency.compareTo(left.frequency);
+            return frequency != 0 ? frequency : left.id.compareTo(right.id);
+          });
+    final count = additionalCount.clamp(0, remainingCapacity);
+    final expanded = [..._queue, ...candidates.take(count)];
+    if (expanded.length == _queue.length) return;
+
+    _queue = List.unmodifiable(expanded);
+    _state = _state.copyWith(
+      sessionWordIds: _queue.map((word) => word.id).toList(growable: false),
     );
     await _store.save(_state);
   }

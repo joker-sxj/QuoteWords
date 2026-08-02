@@ -152,6 +152,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       builder: (context) => _StudySettingsSheet(initial: _settings),
     );
     if (settings == null) return;
+    await _session?.updateSettings(settings);
     await widget.settingsStore.save(settings);
     await widget.reminder.schedule(settings);
     if (!mounted) return;
