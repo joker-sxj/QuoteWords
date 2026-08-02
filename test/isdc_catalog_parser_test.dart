@@ -32,10 +32,14 @@ void main() {
         },
       ],
     });
-    final padded = source.padRight((source.length + 3) ~/ 4 * 4);
-    final html = '''
+    final padded = [...utf8.encode(source)];
+    while (padded.length % 4 != 0) {
+      padded.add(0x20);
+    }
+    final html =
+        '''
       <html><body>
-        <script type="application/json" id="asp-data">${_base85(padded.codeUnits)}</script>
+        <script type="application/json" id="asp-data">${_base85(padded)}</script>
       </body></html>
     ''';
     final parser = IsdcCatalogParser(
@@ -74,10 +78,12 @@ void main() {
 }
 
 String _base85(List<int> bytes) {
-  final alphabet = String.fromCharCodes([
-    for (var code = 33; code <= 126; code++)
-      if (code != 34 && code != 39 && code != 60) code,
-  ].take(85));
+  final alphabet = String.fromCharCodes(
+    [
+      for (var code = 33; code <= 126; code++)
+        if (code != 34 && code != 39 && code != 60) code,
+    ].take(85),
+  );
   final output = StringBuffer();
   for (var offset = 0; offset < bytes.length; offset += 4) {
     var value =
