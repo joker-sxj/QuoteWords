@@ -59,6 +59,10 @@ class StudySession {
 
   List<VocabularyWord> get queue => _queue;
 
+  int get currentIndex => _state.currentIndex;
+
+  bool isReview(String wordId) => _state.progress.containsKey(wordId);
+
   VocabularyWord? get current {
     if (_state.currentIndex >= _queue.length) return null;
     return _queue[_state.currentIndex];

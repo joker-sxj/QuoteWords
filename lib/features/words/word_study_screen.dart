@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import '../../core/ble/quote_ble_client.dart';
 import '../../core/devices/paired_device_store.dart';
 import '../../core/image/epaper_image_processor.dart';
+import 'data/isdc_catalog_parser.dart';
 import 'data/study_reminder.dart';
+import 'data/study_session.dart';
 import 'data/study_settings_store.dart';
+import 'data/vocabulary_catalog.dart';
 import 'domain/review_scheduler.dart';
 import 'domain/study_settings.dart';
 import 'domain/word_card.dart';
@@ -19,6 +22,8 @@ class WordStudyScreen extends StatefulWidget {
     required this.deviceStore,
     required this.settingsStore,
     required this.reminder,
+    required this.vocabularyCatalog,
+    required this.studyStateStore,
     this.cardRender = renderWordCard,
   });
 
@@ -26,6 +31,8 @@ class WordStudyScreen extends StatefulWidget {
   final DeviceStore deviceStore;
   final StudySettingsStore settingsStore;
   final StudyReminder reminder;
+  final VocabularyCatalog vocabularyCatalog;
+  final StudyStateStore studyStateStore;
   final WordCardRender cardRender;
 
   @override
@@ -33,44 +40,39 @@ class WordStudyScreen extends StatefulWidget {
 }
 
 class _WordStudyScreenState extends State<WordStudyScreen> {
-  static const _previewWords = <WordCardContent>[
-    WordCardContent(
+  static const _fallbackWords = <VocabularyWord>[
+    VocabularyWord(
+      id: 'deposit',
       word: 'deposit',
       phonetic: '/dɪˈpɒzɪt/',
       translation: 'n. 押金；存款',
       example: 'Pay a deposit to reserve it.',
       frequency: 102,
-      reviewLabel: '新词',
-      position: 1,
-      total: 8,
     ),
-    WordCardContent(
+    VocabularyWord(
+      id: 'allocate',
       word: 'allocate',
       phonetic: '/ˈæləkeɪt/',
       translation: 'v. 分配；划拨',
       example: 'The council allocated funds to housing.',
       frequency: 68,
-      reviewLabel: '新词',
-      position: 2,
-      total: 8,
     ),
-    WordCardContent(
+    VocabularyWord(
+      id: 'fluctuate',
       word: 'fluctuate',
       phonetic: '/ˈflʌktʃueɪt/',
       translation: 'v. 波动；起伏',
       example: 'Demand tends to fluctuate during the year.',
       frequency: 45,
-      reviewLabel: '新词',
-      position: 3,
-      total: 8,
     ),
   ];
 
   StudySettings _settings = const StudySettings();
+  StudySession? _session;
   ProcessedImage? _processed;
-  int _index = 0;
   bool _loading = true;
   bool _sending = false;
+  bool _usingFallback = false;
   String _phase = '正在准备词卡';
 
   @override
@@ -85,6 +87,21 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       if (!mounted) return;
       _settings = settings;
       await widget.reminder.schedule(settings);
+      List<VocabularyWord> words;
+      try {
+        words = await widget.vocabularyCatalog.load();
+        if (words.isEmpty) throw const FormatException('词库为空');
+      } catch (_) {
+        words = _fallbackWords;
+        _usingFallback = true;
+      }
+      final session = StudySession(
+        words: words,
+        store: widget.studyStateStore,
+        settings: settings,
+      );
+      await session.load();
+      _session = session;
       await _renderCurrent();
     } catch (error) {
       if (mounted) setState(() => _phase = '词卡准备失败');
@@ -93,26 +110,37 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
     }
   }
 
-  WordCardContent get _content {
-    final source = _previewWords[_index % _previewWords.length];
+  WordCardContent? get _content {
+    final session = _session;
+    final source = session?.current;
+    if (session == null || source == null) return null;
     return WordCardContent(
       word: source.word,
       phonetic: source.phonetic,
       translation: source.translation,
       example: source.example,
       frequency: source.frequency,
-      reviewLabel: source.reviewLabel,
-      position: _index + 1,
-      total: _settings.newWordsPerDay,
+      reviewLabel: session.isReview(source.id) ? '复习' : '新词',
+      position: session.currentIndex + 1,
+      total: session.queue.length,
     );
   }
 
   Future<void> _renderCurrent() async {
-    final rendered = await widget.cardRender(_content);
+    final content = _content;
+    if (content == null) {
+      if (!mounted) return;
+      setState(() {
+        _processed = null;
+        _phase = '今日学习已完成';
+      });
+      return;
+    }
+    final rendered = await widget.cardRender(content);
     if (!mounted) return;
     setState(() {
       _processed = rendered;
-      _phase = '词卡已就绪';
+      _phase = _usingFallback ? '使用内置词卡' : '词卡已就绪';
     });
   }
 
@@ -132,12 +160,11 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
   }
 
   Future<void> _rate(RecallRating rating) async {
-    if (_loading || _sending) return;
-    setState(() {
-      _index = (_index + 1) % _settings.newWordsPerDay;
-      _loading = true;
-    });
+    final session = _session;
+    if (_loading || _sending || session?.current == null) return;
+    setState(() => _loading = true);
     try {
+      await session!.rate(rating);
       await _renderCurrent();
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -238,7 +265,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
                               fit: BoxFit.fill,
                               filterQuality: FilterQuality.none,
                               gaplessPlayback: true,
-                              semanticLabel: '${_content.word} 词卡预览',
+                              semanticLabel: '${_content!.word} 词卡预览',
                             ),
                           if (_loading)
                             const ColoredBox(

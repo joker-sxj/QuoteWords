@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'core/ble/quote_ble_client.dart';
 import 'core/devices/paired_device_store.dart';
 import 'features/editor/editor_screen.dart';
+import 'features/words/data/catalog_adapters.dart';
 import 'features/words/data/study_reminder.dart';
+import 'features/words/data/study_session.dart';
 import 'features/words/data/study_settings_store.dart';
+import 'features/words/data/study_state_store.dart';
+import 'features/words/data/vocabulary_catalog.dart';
 import 'features/words/rendering/word_card_renderer.dart';
 import 'features/words/word_study_screen.dart';
 
@@ -22,6 +26,8 @@ class QuoteImageApp extends StatelessWidget {
     this.deviceStore,
     this.studySettingsStore,
     this.studyReminder,
+    this.vocabularyCatalog,
+    this.studyStateStore,
     this.wordCardRender,
     this.initialSection = HomeSection.words,
   });
@@ -30,6 +36,8 @@ class QuoteImageApp extends StatelessWidget {
   final DeviceStore? deviceStore;
   final StudySettingsStore? studySettingsStore;
   final StudyReminder? studyReminder;
+  final VocabularyCatalog? vocabularyCatalog;
+  final StudyStateStore? studyStateStore;
   final WordCardRender? wordCardRender;
   final HomeSection initialSection;
 
@@ -98,6 +106,16 @@ class QuoteImageApp extends StatelessWidget {
         studySettingsStore:
             studySettingsStore ?? PersistentStudySettingsStore(),
         studyReminder: studyReminder ?? LocalStudyReminder(),
+        vocabularyCatalog:
+            vocabularyCatalog ??
+            CachedVocabularyCatalog(
+              cache: JsonFileVocabularyCatalogCache(),
+              source: IsdcVocabularyCatalogSource(
+                loadPage: downloadIsdcPage,
+                decodeSegment: AndroidBrotliDecoder().call,
+              ),
+            ),
+        studyStateStore: studyStateStore ?? JsonFileStudyStateStore(),
         wordCardRender: wordCardRender ?? renderWordCard,
         initialSection: initialSection,
       ),
@@ -111,6 +129,8 @@ class _QuoteHome extends StatefulWidget {
     required this.deviceStore,
     required this.studySettingsStore,
     required this.studyReminder,
+    required this.vocabularyCatalog,
+    required this.studyStateStore,
     required this.wordCardRender,
     required this.initialSection,
   });
@@ -119,6 +139,8 @@ class _QuoteHome extends StatefulWidget {
   final DeviceStore deviceStore;
   final StudySettingsStore studySettingsStore;
   final StudyReminder studyReminder;
+  final VocabularyCatalog vocabularyCatalog;
+  final StudyStateStore studyStateStore;
   final WordCardRender wordCardRender;
   final HomeSection initialSection;
 
@@ -137,6 +159,8 @@ class _QuoteHomeState extends State<_QuoteHome> {
         deviceStore: widget.deviceStore,
         settingsStore: widget.studySettingsStore,
         reminder: widget.studyReminder,
+        vocabularyCatalog: widget.vocabularyCatalog,
+        studyStateStore: widget.studyStateStore,
         cardRender: widget.wordCardRender,
       ),
       HomeSection.image => EditorScreen(

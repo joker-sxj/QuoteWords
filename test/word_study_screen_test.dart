@@ -160,6 +160,7 @@ void main() {
     expect(rendered.last.position, 1);
     expect(rendered.last.total, 2);
 
+    await tester.ensureVisible(find.text('认识'));
     await tester.tap(find.text('认识'));
     await tester.pumpAndSettle();
 
@@ -178,6 +179,7 @@ void main() {
       QuoteImageApp(
         vocabularyCatalog: FailingVocabularyCatalog(),
         studyStateStore: MemoryStudyStateStore(),
+        studySettingsStore: MemoryStudySettingsStore(),
         studyReminder: RecordingStudyReminder(),
         deviceStore: EmptyDeviceStore(),
         wordCardRender: (content) async {
