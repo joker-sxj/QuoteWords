@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/domain/study_settings.dart';
+import 'package:quotewords/features/words/domain/study_settings.dart';
 
 void main() {
   test('defaults match the six-month Android study plan', () {

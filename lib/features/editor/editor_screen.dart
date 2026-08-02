@@ -543,7 +543,7 @@ class _EditorScreenState extends State<EditorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('QuoteImage'),
+        title: const Text('QuoteWords'),
         actions: [
           IconButton(
             onPressed: _scanning ? null : _openDeviceSwitcher,

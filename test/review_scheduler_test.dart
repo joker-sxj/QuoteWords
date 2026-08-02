@@ -1,13 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/domain/review_scheduler.dart';
-import 'package:quoteimage_mobile/features/words/domain/study_settings.dart';
+import 'package:quotewords/features/words/domain/review_scheduler.dart';
+import 'package:quotewords/features/words/domain/study_settings.dart';
 
 void main() {
   final now = DateTime(2026, 8, 2, 9);
 
   test('good recall follows the Ebbinghaus learning intervals', () {
     const scheduler = ReviewScheduler();
-    var progress = WordProgress.initial('deposit', dueAt: DateTime(2026, 8, 2, 9));
+    var progress = WordProgress.initial(
+      'deposit',
+      dueAt: DateTime(2026, 8, 2, 9),
+    );
 
     final expected = <Duration>[
       const Duration(minutes: 10),
@@ -58,10 +61,8 @@ void main() {
     );
     final newWords = List.generate(
       8,
-      (index) => StudyCandidate.newWord(
-        wordId: 'new-$index',
-        frequency: 100 - index,
-      ),
+      (index) =>
+          StudyCandidate.newWord(wordId: 'new-$index', frequency: 100 - index),
     );
 
     final plan = DailyStudyPlan.build(
@@ -76,20 +77,21 @@ void main() {
     expect(plan.reviewCount, 24);
   });
 
-  test('daily plan fills remaining capacity with the highest-frequency words', () {
-    final plan = DailyStudyPlan.build(
-      dueReviews: [
-        StudyCandidate.review(wordId: 'due', dueAt: now),
-      ],
-      newWords: [
-        const StudyCandidate.newWord(wordId: 'lower', frequency: 41),
-        const StudyCandidate.newWord(wordId: 'higher', frequency: 99),
-      ],
-      settings: const StudySettings(newWordsPerDay: 1, dailyLimit: 3),
-    );
+  test(
+    'daily plan fills remaining capacity with the highest-frequency words',
+    () {
+      final plan = DailyStudyPlan.build(
+        dueReviews: [StudyCandidate.review(wordId: 'due', dueAt: now)],
+        newWords: [
+          const StudyCandidate.newWord(wordId: 'lower', frequency: 41),
+          const StudyCandidate.newWord(wordId: 'higher', frequency: 99),
+        ],
+        settings: const StudySettings(newWordsPerDay: 1, dailyLimit: 3),
+      );
 
-    expect(plan.items.map((item) => item.wordId), ['due', 'higher']);
-    expect(plan.newWordCount, 1);
-    expect(plan.reviewCount, 1);
-  });
+      expect(plan.items.map((item) => item.wordId), ['due', 'higher']);
+      expect(plan.newWordCount, 1);
+      expect(plan.reviewCount, 1);
+    },
+  );
 }

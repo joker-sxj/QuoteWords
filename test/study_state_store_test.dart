@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/data/study_session.dart';
-import 'package:quoteimage_mobile/features/words/data/study_state_store.dart';
-import 'package:quoteimage_mobile/features/words/domain/review_scheduler.dart';
+import 'package:quotewords/features/words/data/study_session.dart';
+import 'package:quotewords/features/words/data/study_state_store.dart';
+import 'package:quotewords/features/words/domain/review_scheduler.dart';
 
 void main() {
   test(

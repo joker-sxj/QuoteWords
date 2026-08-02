@@ -1,4 +1,4 @@
-package tech.undef.quoteimage
+package tech.undef.quotewords
 
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.android.FlutterActivity
@@ -11,7 +11,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            "tech.undef.quoteimage/brotli",
+            "tech.undef.quotewords/brotli",
         ).setMethodCallHandler { call, result ->
             if (call.method != "decompress") {
                 result.notImplemented()

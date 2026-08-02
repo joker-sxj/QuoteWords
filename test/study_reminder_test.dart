@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/data/study_reminder.dart';
-import 'package:quoteimage_mobile/features/words/domain/study_settings.dart';
+import 'package:quotewords/features/words/data/study_reminder.dart';
+import 'package:quotewords/features/words/domain/study_settings.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 

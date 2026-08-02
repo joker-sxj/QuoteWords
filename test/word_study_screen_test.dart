@@ -2,17 +2,17 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as image;
-import 'package:quoteimage_mobile/core/ble/quote_protocol.dart';
-import 'package:quoteimage_mobile/core/devices/paired_device_store.dart';
-import 'package:quoteimage_mobile/core/image/epaper_image_processor.dart';
-import 'package:quoteimage_mobile/features/words/data/isdc_catalog_parser.dart';
-import 'package:quoteimage_mobile/features/words/data/study_reminder.dart';
-import 'package:quoteimage_mobile/features/words/data/study_session.dart';
-import 'package:quoteimage_mobile/features/words/data/study_settings_store.dart';
-import 'package:quoteimage_mobile/features/words/data/vocabulary_catalog.dart';
-import 'package:quoteimage_mobile/features/words/domain/study_settings.dart';
-import 'package:quoteimage_mobile/features/words/domain/word_card.dart';
-import 'package:quoteimage_mobile/main.dart';
+import 'package:quotewords/core/ble/quote_protocol.dart';
+import 'package:quotewords/core/devices/paired_device_store.dart';
+import 'package:quotewords/core/image/epaper_image_processor.dart';
+import 'package:quotewords/features/words/data/isdc_catalog_parser.dart';
+import 'package:quotewords/features/words/data/study_reminder.dart';
+import 'package:quotewords/features/words/data/study_session.dart';
+import 'package:quotewords/features/words/data/study_settings_store.dart';
+import 'package:quotewords/features/words/data/vocabulary_catalog.dart';
+import 'package:quotewords/features/words/domain/study_settings.dart';
+import 'package:quotewords/features/words/domain/word_card.dart';
+import 'package:quotewords/main.dart';
 
 class MemoryStudySettingsStore implements StudySettingsStore {
   StudySettings value = const StudySettings();
@@ -97,7 +97,7 @@ void main() {
     final reminder = RecordingStudyReminder();
 
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         studySettingsStore: settings,
         studyReminder: reminder,
         vocabularyCatalog: FixedVocabularyCatalog(const [allocateWord]),
@@ -137,7 +137,7 @@ void main() {
     final rendered = <WordCardContent>[];
 
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         vocabularyCatalog: FixedVocabularyCatalog(const [
           allocateWord,
           depositWord,
@@ -175,7 +175,7 @@ void main() {
     final rendered = <WordCardContent>[];
 
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         vocabularyCatalog: FailingVocabularyCatalog(),
         studyStateStore: MemoryStudyStateStore(),
         studySettingsStore: MemoryStudySettingsStore(),
@@ -197,7 +197,7 @@ void main() {
     final rendered = <WordCardContent>[];
 
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         vocabularyCatalog: FixedVocabularyCatalog(const [
           allocateWord,
           depositWord,
@@ -235,7 +235,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      QuoteImageApp(
+      QuoteWordsApp(
         initialSection: HomeSection.image,
         wordCardRender: fakeWordCardRender,
         deviceStore: EmptyDeviceStore(),

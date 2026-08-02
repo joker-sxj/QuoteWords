@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/data/isdc_catalog_parser.dart';
-import 'package:quoteimage_mobile/features/words/data/study_session.dart';
-import 'package:quoteimage_mobile/features/words/domain/review_scheduler.dart';
-import 'package:quoteimage_mobile/features/words/domain/study_settings.dart';
+import 'package:quotewords/features/words/data/isdc_catalog_parser.dart';
+import 'package:quotewords/features/words/data/study_session.dart';
+import 'package:quotewords/features/words/domain/review_scheduler.dart';
+import 'package:quotewords/features/words/domain/study_settings.dart';
 
 const reviewWord = VocabularyWord(
   id: 'review',

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quoteimage_mobile/features/words/data/isdc_catalog_parser.dart';
+import 'package:quotewords/features/words/data/isdc_catalog_parser.dart';
 
 void main() {
   test('keeps only high-frequency fields needed by the e-paper card', () async {

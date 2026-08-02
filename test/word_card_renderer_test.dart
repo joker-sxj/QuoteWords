@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as image;
-import 'package:quoteimage_mobile/core/ble/quote_protocol.dart';
-import 'package:quoteimage_mobile/features/words/domain/word_card.dart';
-import 'package:quoteimage_mobile/features/words/rendering/word_card_renderer.dart';
+import 'package:quotewords/core/ble/quote_protocol.dart';
+import 'package:quotewords/features/words/domain/word_card.dart';
+import 'package:quotewords/features/words/rendering/word_card_renderer.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
