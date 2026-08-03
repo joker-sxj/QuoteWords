@@ -17,6 +17,7 @@ void main() {
 
     expect(pubspec, contains('name: quotewords'));
     expect(pubspec, contains('description: QuoteWords'));
+    expect(pubspec, contains('version: 1.0.2+3'));
     expect(androidBuild, contains('namespace = "tech.undef.quotewords"'));
     expect(androidBuild, contains('applicationId = "tech.undef.quoteimage"'));
     expect(androidManifest, contains('android:label="QuoteWords"'));
