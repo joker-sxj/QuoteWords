@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -43,6 +44,13 @@ class FixedVocabularyCatalog implements VocabularyCatalog {
 class FailingVocabularyCatalog implements VocabularyCatalog {
   @override
   Future<List<VocabularyWord>> load() async => throw Exception('offline');
+}
+
+class DeferredVocabularyCatalog implements VocabularyCatalog {
+  final completer = Completer<List<VocabularyWord>>();
+
+  @override
+  Future<List<VocabularyWord>> load() => completer.future;
 }
 
 class MemoryStudyStateStore implements StudyStateStore {
@@ -191,6 +199,36 @@ void main() {
 
     expect(rendered.last.word, 'deposit');
     expect(find.text('使用内置词卡'), findsOneWidget);
+  });
+
+  testWidgets('first card renders while the initial catalog is still loading', (
+    tester,
+  ) async {
+    final catalog = DeferredVocabularyCatalog();
+    final rendered = <WordCardContent>[];
+
+    await tester.pumpWidget(
+      QuoteWordsApp(
+        vocabularyCatalog: catalog,
+        studyStateStore: MemoryStudyStateStore(),
+        studySettingsStore: MemoryStudySettingsStore(),
+        studyReminder: RecordingStudyReminder(),
+        deviceStore: EmptyDeviceStore(),
+        wordCardRender: (content) async {
+          rendered.add(content);
+          return fakeWordCardRender(content);
+        },
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(rendered.single.word, 'deposit');
+    expect(find.text('正在更新词库'), findsOneWidget);
+
+    catalog.completer.complete(const [allocateWord]);
+    await tester.pumpAndSettle();
+    expect(rendered.last.word, 'allocate');
   });
 
   testWidgets('increasing new words adds more cards to today', (tester) async {

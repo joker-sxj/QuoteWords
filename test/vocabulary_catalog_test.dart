@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quotewords/features/words/data/isdc_catalog_parser.dart';
 import 'package:quotewords/features/words/data/vocabulary_catalog.dart';
@@ -45,6 +47,17 @@ class RecordingCatalogSource implements VocabularyCatalogSource {
   }
 }
 
+class DeferredCatalogSource implements VocabularyCatalogSource {
+  final completer = Completer<List<VocabularyWord>>();
+  int calls = 0;
+
+  @override
+  Future<List<VocabularyWord>> fetch() {
+    calls++;
+    return completer.future;
+  }
+}
+
 void main() {
   final now = DateTime.utc(2026, 8, 2, 9);
 
@@ -67,22 +80,31 @@ void main() {
     expect(source.calls, 0);
   });
 
-  test('refreshes stale data and persists the minimum catalog', () async {
+  test('returns stale data immediately and refreshes it in background', () async {
     final cache = MemoryCatalogCache()
       ..snapshot = CatalogSnapshot(
         words: const [cachedWord],
         syncedAt: now.subtract(const Duration(days: 8)),
       );
-    final source = RecordingCatalogSource(const [freshWord]);
+    final source = DeferredCatalogSource();
     final catalog = CachedVocabularyCatalog(
       cache: cache,
       source: source,
       now: () => now,
     );
 
-    final words = await catalog.load();
+    var returnedBeforeNetwork = false;
+    final load = catalog.load()..then((_) => returnedBeforeNetwork = true);
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
 
-    expect(words, const [freshWord]);
+    final wasImmediate = returnedBeforeNetwork;
+    source.completer.complete(const [freshWord]);
+    final words = await load;
+    await Future<void>.delayed(Duration.zero);
+
+    expect(wasImmediate, isTrue);
+    expect(words, const [cachedWord]);
     expect(source.calls, 1);
     expect(cache.snapshot?.words, const [freshWord]);
     expect(cache.snapshot?.syncedAt, now);
