@@ -110,7 +110,10 @@ Map<String, Object> _process(Map<String, Object> message) {
   }
 
   final mode = DitherMode.values[message['dither']! as int];
-  if (mode == DitherMode.atkinson) _stretchContrast(luma);
+  if (mode == DitherMode.atkinson) {
+    _stretchContrast(luma);
+    _enhanceDetails(luma, width, height);
+  }
 
   final output = image.Image(width: width, height: height, numChannels: 3);
   final frame = Uint8List(QuoteProtocol.frameSize)
@@ -187,6 +190,32 @@ void _stretchContrast(Float64List values) {
   final scale = 255 / (high - low);
   for (var index = 0; index < values.length; index++) {
     values[index] = ((values[index] - low) * scale).clamp(0, 255);
+  }
+}
+
+void _enhanceDetails(Float64List values, int width, int height) {
+  final occupiedLevels = <int>{
+    for (final value in values) value.round().clamp(0, 255),
+  }.length;
+  if (occupiedLevels <= 32) {
+    for (var index = 0; index < values.length; index++) {
+      values[index] = (128 + (values[index] - 128) * 3).clamp(0, 255);
+    }
+    return;
+  }
+
+  final source = Float64List.fromList(values);
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      final index = y * width + x;
+      final left = source[y * width + math.max(0, x - 1)];
+      final right = source[y * width + math.min(width - 1, x + 1)];
+      final top = source[math.max(0, y - 1) * width + x];
+      final bottom = source[math.min(height - 1, y + 1) * width + x];
+      final neighborAverage = (left + right + top + bottom) / 4;
+      values[index] = (source[index] + (source[index] - neighborAverage) * 0.75)
+          .clamp(0, 255);
+    }
   }
 }
 
