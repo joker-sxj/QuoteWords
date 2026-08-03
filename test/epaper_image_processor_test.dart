@@ -88,4 +88,73 @@ void main() {
     expect(first.frame, second.frame);
     expect(first.frame.toSet().containsAll({0, 0xff}), isTrue);
   });
+
+  test(
+    'Atkinson separates low-contrast regions for a readable panel',
+    () async {
+      final source = image.Image(width: 296, height: 152, numChannels: 3);
+      for (var y = 0; y < source.height; y++) {
+        for (var x = 0; x < source.width; x++) {
+          final value = x < source.width ~/ 2 ? 112 : 144;
+          source.setPixelRgb(x, y, value, value, value);
+        }
+      }
+
+      final result = await processImage(
+        Uint8List.fromList(image.encodePng(source)),
+        const ImageProcessingOptions(
+          fit: ImageFitMode.cover,
+          dither: DitherMode.atkinson,
+        ),
+      );
+      final preview = image.decodePng(result.previewPng)!;
+      final darkRatio = _blackRatio(preview, left: 20, right: 120);
+      final lightRatio = _blackRatio(preview, left: 176, right: 276);
+
+      expect(darkRatio - lightRatio, greaterThan(0.75));
+    },
+  );
+
+  test('Atkinson preserves a thin low-contrast stroke', () async {
+    final source = image.Image(width: 296, height: 152, numChannels: 3)
+      ..clear(image.ColorRgb8(170, 170, 170));
+    for (var y = 0; y < source.height; y++) {
+      for (var x = 0; x < 6; x++) {
+        source.setPixelRgb(x, y, 0, 0, 0);
+      }
+      for (var x = source.width - 6; x < source.width; x++) {
+        source.setPixelRgb(x, y, 255, 255, 255);
+      }
+      source.setPixelRgb(148, y, 100, 100, 100);
+    }
+
+    final result = await processImage(
+      Uint8List.fromList(image.encodePng(source)),
+      const ImageProcessingOptions(
+        fit: ImageFitMode.cover,
+        dither: DitherMode.atkinson,
+      ),
+    );
+    final preview = image.decodePng(result.previewPng)!;
+    final strokeRatio = _blackRatio(preview, left: 148, right: 149);
+    final backgroundRatio = _blackRatio(preview, left: 130, right: 140);
+
+    expect(strokeRatio - backgroundRatio, greaterThan(0.8));
+  });
+}
+
+double _blackRatio(
+  image.Image source, {
+  required int left,
+  required int right,
+}) {
+  var black = 0;
+  var total = 0;
+  for (var y = 0; y < source.height; y++) {
+    for (var x = left; x < right; x++) {
+      if (source.getPixel(x, y).r == 0) black++;
+      total++;
+    }
+  }
+  return black / total;
 }

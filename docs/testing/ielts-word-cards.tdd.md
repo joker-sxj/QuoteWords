@@ -40,6 +40,10 @@ decisions agreed for the Android client:
 | Parse and cache ISDC Chinese example field `ec` | `e4e7704` | `bcc1bcf` | `flutter test test/isdc_catalog_parser_test.dart test/catalog_adapters_test.dart` |
 | Pass Chinese examples from study data to card rendering | `9087de8` | `d890134` | `flutter test test/word_study_screen_test.dart` |
 | Compact bilingual 296 x 152 card layout | `5babd3c` | `746e6f6` | `flutter test test/word_card_renderer_test.dart` |
+| Adaptive contrast for low-contrast e-paper input | `e0b0393` | `5a57157` | `flutter test test/epaper_image_processor_test.dart` |
+| Preserve thin strokes before Atkinson dithering | `38b42f8` | `de6d3e9` | `flutter test test/epaper_image_processor_test.dart` |
+| Plain-language clarity mode labels | `83cd6d0` | `9952d7d` | `flutter test test/widget_test.dart` |
+| Clarity release version 1.0.2+3 | `218df3f` | `26f5e75` | `flutter test test/project_identity_test.dart` |
 
 Each RED test failed for the intended missing type, method, or behavior before
 its paired production commit. The checkpoint commits remain reachable from
@@ -64,10 +68,16 @@ the standalone repository history.
 | 13 | Phonetic and Chinese definition share a row, with the Chinese example below English | `word_card_renderer_test.dart` | Rendering | PASS |
 | 14 | Existing Android secure storage remains addressable after the product rename | `project_identity_test.dart` | Build configuration | PASS |
 | 15 | Cached or built-in words render before a slow network refresh completes | `vocabulary_catalog_test.dart`, `word_study_screen_test.dart` | Unit/widget integration | PASS |
+| 16 | Low-contrast regions produce clearly separated black-pixel densities | `epaper_image_processor_test.dart` | Image processing | PASS |
+| 17 | A one-pixel low-contrast stroke remains distinct from its background | `epaper_image_processor_test.dart` | Image processing | PASS |
+| 18 | Image controls expose clear user-facing processing mode names | `widget_test.dart` | Widget | PASS |
+| 19 | Version 1.0.2+3 keeps the legacy Android application ID | `project_identity_test.dart` | Build configuration | PASS |
 
 ## Final verification
 
-- Full suite on 2026-08-03: `flutter test` -> 49 tests passed.
+- Full suite on 2026-08-03: `flutter test` -> 51 tests passed.
+- Clarity feature coverage: `epaper_image_processor.dart` -> 115/121 lines,
+  95.04%.
 - Original scoped coverage run: `flutter test --coverage` -> 45 tests passed.
 - Word feature line coverage: 512/613, 83.52%.
 - Whole mobile app line coverage: 1014/1575, 64.38%. Existing BLE and editor
@@ -79,8 +89,8 @@ the standalone repository history.
   accepted licenses. `flutter build apk --debug` produced
   `build/app/outputs/flutter-apk/app-debug.apk`.
 - Formatting and whitespace: `dart format` and `git diff --check` passed.
-- Android 16 emulator: version 1.0.1+2 installed and launched under the legacy
-  package ID; the immediate fallback card showed the compact bilingual layout.
+- Android 16 emulator: version 1.0.2+3 installed and launched under the legacy
+  package ID; the image page exposed the new clarity mode names.
 
 ## Known gaps
 

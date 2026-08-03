@@ -21,8 +21,9 @@ Date: 2026-08-03
 7. The 296 x 152 preview placed phonetic and Chinese definition on one row and showed the Chinese example below English.
 8. Selecting `熟练` persisted progress and advanced to `allocate`.
 9. The process remained foreground and no application crash appeared in logcat.
+10. Version 1.0.2+3 upgraded in place and exposed `清晰灰阶` and `锐利黑白` on the image page.
 
-The pre-rename APK used package `tech.undef.quoteimage`. Version 1.0.1+2 intentionally restores that application ID so Android secure storage remains accessible after an in-place, same-signature upgrade. The Dart/Kotlin product namespace remains `tech.undef.quotewords`.
+The pre-rename APK used package `tech.undef.quoteimage`. Versions 1.0.1+2 and 1.0.2+3 intentionally retain that application ID so Android secure storage remains accessible after an in-place, same-signature upgrade. The Dart/Kotlin product namespace remains `tech.undef.quotewords`.
 
 ## Commands
 

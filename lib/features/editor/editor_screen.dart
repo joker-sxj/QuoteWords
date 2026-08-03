@@ -658,8 +658,8 @@ class _EditorScreenState extends State<EditorScreen> {
         const SizedBox(height: 8),
         SegmentedButton<DitherMode>(
           segments: const [
-            ButtonSegment(value: DitherMode.atkinson, label: Text('Atkinson')),
-            ButtonSegment(value: DitherMode.threshold, label: Text('阈值黑白')),
+            ButtonSegment(value: DitherMode.atkinson, label: Text('清晰灰阶')),
+            ButtonSegment(value: DitherMode.threshold, label: Text('锐利黑白')),
           ],
           selected: {_dither},
           onSelectionChanged: _controlsEnabled
