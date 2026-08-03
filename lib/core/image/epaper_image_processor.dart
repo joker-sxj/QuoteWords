@@ -109,10 +109,12 @@ Map<String, Object> _process(Map<String, Object> message) {
     }
   }
 
+  final mode = DitherMode.values[message['dither']! as int];
+  if (mode == DitherMode.atkinson) _stretchContrast(luma);
+
   final output = image.Image(width: width, height: height, numChannels: 3);
   final frame = Uint8List(QuoteProtocol.frameSize)
     ..fillRange(0, QuoteProtocol.frameSize, 0xff);
-  final mode = DitherMode.values[message['dither']! as int];
   final threshold = message['threshold']! as int;
 
   for (var y = 0; y < height; y++) {
@@ -152,6 +154,40 @@ Map<String, Object> _process(Map<String, Object> message) {
     'preview': Uint8List.fromList(image.encodePng(landscapePreview, level: 1)),
     'frame': frame,
   };
+}
+
+void _stretchContrast(Float64List values) {
+  final histogram = List<int>.filled(256, 0);
+  for (final value in values) {
+    histogram[value.round().clamp(0, 255)]++;
+  }
+
+  final lowTarget = (values.length * 0.01).floor();
+  final highTarget = (values.length * 0.99).ceil();
+  var cumulative = 0;
+  var low = 0;
+  var high = 255;
+  for (var value = 0; value < histogram.length; value++) {
+    cumulative += histogram[value];
+    if (cumulative > lowTarget) {
+      low = value;
+      break;
+    }
+  }
+  cumulative = 0;
+  for (var value = 0; value < histogram.length; value++) {
+    cumulative += histogram[value];
+    if (cumulative >= highTarget) {
+      high = value;
+      break;
+    }
+  }
+  if (high - low < 16) return;
+
+  final scale = 255 / (high - low);
+  for (var index = 0; index < values.length; index++) {
+    values[index] = ((values[index] - low) * scale).clamp(0, 255);
+  }
 }
 
 double _jitter(int x, int y) {
