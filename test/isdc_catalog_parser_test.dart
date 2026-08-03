@@ -16,6 +16,7 @@ void main() {
               'p': 'ˈæləkeɪt',
               't': 'v. 分配；划拨',
               'e': 'The council allocated funds to housing.',
+              'ec': '市政会把资金划拨给住房项目。',
               'oc': 68,
               'ed': 'an intentionally excluded long definition',
               'ay': 'audio/example.mp3',
@@ -54,6 +55,7 @@ void main() {
     expect(words.single.phonetic, '/ˈæləkeɪt/');
     expect(words.single.translation, 'v. 分配；划拨');
     expect(words.single.example, 'The council allocated funds to housing.');
+    expect(words.single.exampleTranslation, '市政会把资金划拨给住房项目。');
     expect(words.single.frequency, 68);
     expect(words.single.toJson().keys, {
       'id',
@@ -61,6 +63,7 @@ void main() {
       'phonetic',
       'translation',
       'example',
+      'exampleTranslation',
       'frequency',
     });
   });
