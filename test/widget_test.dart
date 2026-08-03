@@ -111,7 +111,8 @@ void main() {
 
     expect(find.text('QuoteWords'), findsOneWidget);
     expect(find.text('尺寸适配'), findsOneWidget);
-    expect(find.text('Atkinson'), findsOneWidget);
+    expect(find.text('清晰灰阶'), findsOneWidget);
+    expect(find.text('锐利黑白'), findsOneWidget);
     expect(find.text('296 × 152'), findsOneWidget);
     expect(find.byIcon(Icons.photo_library_outlined), findsOneWidget);
     expect(find.text('发送到设备'), findsOneWidget);
