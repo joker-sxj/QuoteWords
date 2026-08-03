@@ -17,11 +17,12 @@ Date: 2026-08-03
 3. `adb install -r` installed the APK successfully.
 4. Android notification permission was granted and the 09:00 repeating schedule was stored.
 5. The default word-study page rendered without a process or Activity crash.
-6. A slow first ISDC request timed out and correctly selected the built-in catalog.
-7. The 296 x 152 card preview rendered `deposit`, then selecting `熟练` persisted progress and advanced to `allocate`.
-8. The process remained foreground and no application crash appeared in logcat.
+6. The built-in `deposit` card rendered immediately while the first ISDC request continued in the background.
+7. The 296 x 152 preview placed phonetic and Chinese definition on one row and showed the Chinese example below English.
+8. Selecting `熟练` persisted progress and advanced to `allocate`.
+9. The process remained foreground and no application crash appeared in logcat.
 
-The pre-rename APK used package `tech.undef.quoteimage`. After the product identity change, `apkanalyzer` verified that the new APK uses `tech.undef.quotewords` and version `1.0.0`; the full Flutter suite, analyzer, and APK build passed again.
+The pre-rename APK used package `tech.undef.quoteimage`. Version 1.0.1+2 intentionally restores that application ID so Android secure storage remains accessible after an in-place, same-signature upgrade. The Dart/Kotlin product namespace remains `tech.undef.quotewords`.
 
 ## Commands
 
@@ -30,8 +31,8 @@ flutter test
 flutter analyze
 flutter build apk --debug
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
-adb shell am start -W -n tech.undef.quotewords/.MainActivity
-adb shell pidof tech.undef.quotewords
+adb shell am start -W -n tech.undef.quoteimage/tech.undef.quotewords.MainActivity
+adb shell pidof tech.undef.quoteimage
 ```
 
 ## Remaining device-only checks
@@ -39,5 +40,6 @@ adb shell pidof tech.undef.quotewords
 - Real notification delivery at 09:00
 - Nearby-device runtime permission on a physical phone
 - Quote/0 discovery and four-digit pairing
+- Recovery of an existing same-phone, same-signature pairing credential
 - Brotli decode after a complete live ISDC download
 - BLE frame upload and physical e-paper refresh
