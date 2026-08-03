@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'isdc_catalog_parser.dart';
 
 class CatalogSnapshot {
@@ -40,20 +42,29 @@ class CachedVocabularyCatalog implements VocabularyCatalog {
     final cached = await _cache.read();
     final currentTime = _now();
     if (cached != null &&
-        cached.words.isNotEmpty &&
-        currentTime.difference(cached.syncedAt) < maxAge) {
+        cached.words.isNotEmpty) {
+      if (currentTime.difference(cached.syncedAt) >= maxAge) {
+        unawaited(_refresh(currentTime));
+      }
       return cached.words;
     }
 
+    return _fetchAndStore(currentTime);
+  }
+
+  Future<List<VocabularyWord>> _fetchAndStore(DateTime currentTime) async {
+    final words = await _source.fetch();
+    if (words.isEmpty) throw const FormatException('同步结果没有高频词');
+    final snapshot = CatalogSnapshot(words: words, syncedAt: currentTime);
+    await _cache.write(snapshot);
+    return words;
+  }
+
+  Future<void> _refresh(DateTime currentTime) async {
     try {
-      final words = await _source.fetch();
-      if (words.isEmpty) throw const FormatException('同步结果没有高频词');
-      final snapshot = CatalogSnapshot(words: words, syncedAt: currentTime);
-      await _cache.write(snapshot);
-      return words;
+      await _fetchAndStore(currentTime);
     } catch (_) {
-      if (cached != null && cached.words.isNotEmpty) return cached.words;
-      rethrow;
+      // The stale catalog remains usable until a later refresh succeeds.
     }
   }
 }
