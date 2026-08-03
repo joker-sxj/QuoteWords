@@ -47,6 +47,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: '/dɪˈpɒzɪt/',
       translation: 'n. 押金；存款',
       example: 'Pay a deposit to reserve it.',
+      exampleTranslation: '支付押金即可预留。',
       frequency: 102,
     ),
     VocabularyWord(
@@ -55,6 +56,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: '/ˈæləkeɪt/',
       translation: 'v. 分配；划拨',
       example: 'The council allocated funds to housing.',
+      exampleTranslation: '市政会把资金划拨给住房项目。',
       frequency: 68,
     ),
     VocabularyWord(
@@ -63,6 +65,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: '/ˈflʌktʃueɪt/',
       translation: 'v. 波动；起伏',
       example: 'Demand tends to fluctuate during the year.',
+      exampleTranslation: '需求往往会在一年中波动。',
       frequency: 45,
     ),
   ];
@@ -124,6 +127,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
         phonetic: source.phonetic,
         translation: source.translation,
         example: source.example,
+        exampleTranslation: source.exampleTranslation,
         frequency: source.frequency,
         reviewLabel: '新词',
         position: 1,
@@ -146,6 +150,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: source.phonetic,
       translation: source.translation,
       example: source.example,
+      exampleTranslation: source.exampleTranslation,
       frequency: source.frequency,
       reviewLabel: session.isReview(source.id) ? '复习' : '新词',
       position: session.currentIndex + 1,
