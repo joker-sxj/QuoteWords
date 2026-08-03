@@ -12,6 +12,7 @@ class VocabularyWord {
     required this.phonetic,
     required this.translation,
     required this.example,
+    this.exampleTranslation = '',
     required this.frequency,
   });
 
@@ -22,6 +23,7 @@ class VocabularyWord {
       phonetic: json['phonetic']! as String,
       translation: json['translation']! as String,
       example: json['example']! as String,
+      exampleTranslation: _asText(json['exampleTranslation']),
       frequency: json['frequency']! as int,
     );
   }
@@ -31,6 +33,7 @@ class VocabularyWord {
   final String phonetic;
   final String translation;
   final String example;
+  final String exampleTranslation;
   final int frequency;
 
   Map<String, Object> toJson() => {
@@ -39,6 +42,7 @@ class VocabularyWord {
     'phonetic': phonetic,
     'translation': translation,
     'example': example,
+    'exampleTranslation': exampleTranslation,
     'frequency': frequency,
   };
 }
@@ -92,6 +96,7 @@ class IsdcCatalogParser {
           phonetic: phonetic,
           translation: translation,
           example: _asText(rawWord['e']),
+          exampleTranslation: _asText(rawWord['ec']),
           frequency: frequency,
         );
         final previous = byId[id];
