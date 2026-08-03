@@ -22,6 +22,7 @@ void main() {
           phonetic: '/ˈæləkeɪt/',
           translation: 'v. 分配；划拨',
           example: 'Allocate funds carefully.',
+          exampleTranslation: '谨慎地分配资金。',
           frequency: 68,
         ),
       ],
@@ -33,6 +34,7 @@ void main() {
 
     expect(loaded?.syncedAt, snapshot.syncedAt);
     expect(loaded?.words.single.toJson(), snapshot.words.single.toJson());
+    expect(loaded?.words.single.exampleTranslation, '谨慎地分配资金。');
     final persisted = await File(
       '${directory.path}/ielts-catalog.json',
     ).readAsString();

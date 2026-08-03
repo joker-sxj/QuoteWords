@@ -47,6 +47,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: '/dɪˈpɒzɪt/',
       translation: 'n. 押金；存款',
       example: 'Pay a deposit to reserve it.',
+      exampleTranslation: '支付押金即可预留。',
       frequency: 102,
     ),
     VocabularyWord(
@@ -55,6 +56,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: '/ˈæləkeɪt/',
       translation: 'v. 分配；划拨',
       example: 'The council allocated funds to housing.',
+      exampleTranslation: '市政会把资金划拨给住房项目。',
       frequency: 68,
     ),
     VocabularyWord(
@@ -63,6 +65,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: '/ˈflʌktʃueɪt/',
       translation: 'v. 波动；起伏',
       example: 'Demand tends to fluctuate during the year.',
+      exampleTranslation: '需求往往会在一年中波动。',
       frequency: 45,
     ),
   ];
@@ -86,15 +89,10 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       final settings = await widget.settingsStore.load();
       if (!mounted) return;
       _settings = settings;
+      final wordsFuture = _loadVocabulary();
+      await _renderLoadingCard(settings);
       await widget.reminder.schedule(settings);
-      List<VocabularyWord> words;
-      try {
-        words = await widget.vocabularyCatalog.load();
-        if (words.isEmpty) throw const FormatException('词库为空');
-      } catch (_) {
-        words = _fallbackWords;
-        _usingFallback = true;
-      }
+      final words = await wordsFuture;
       final session = StudySession(
         words: words,
         store: widget.studyStateStore,
@@ -110,6 +108,39 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
     }
   }
 
+  Future<List<VocabularyWord>> _loadVocabulary() async {
+    try {
+      final words = await widget.vocabularyCatalog.load();
+      if (words.isEmpty) throw const FormatException('词库为空');
+      return words;
+    } catch (_) {
+      _usingFallback = true;
+      return _fallbackWords;
+    }
+  }
+
+  Future<void> _renderLoadingCard(StudySettings settings) async {
+    final source = _fallbackWords.first;
+    final rendered = await widget.cardRender(
+      WordCardContent(
+        word: source.word,
+        phonetic: source.phonetic,
+        translation: source.translation,
+        example: source.example,
+        exampleTranslation: source.exampleTranslation,
+        frequency: source.frequency,
+        reviewLabel: '新词',
+        position: 1,
+        total: settings.newWordsPerDay,
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      _processed = rendered;
+      _phase = '正在更新词库';
+    });
+  }
+
   WordCardContent? get _content {
     final session = _session;
     final source = session?.current;
@@ -119,6 +150,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
       phonetic: source.phonetic,
       translation: source.translation,
       example: source.example,
+      exampleTranslation: source.exampleTranslation,
       frequency: source.frequency,
       reviewLabel: session.isReview(source.id) ? '复习' : '新词',
       position: session.currentIndex + 1,
@@ -266,7 +298,8 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
                               fit: BoxFit.fill,
                               filterQuality: FilterQuality.none,
                               gaplessPlayback: true,
-                              semanticLabel: '${_content!.word} 词卡预览',
+                              semanticLabel:
+                                  '${_content?.word ?? _fallbackWords.first.word} 词卡预览',
                             ),
                           if (_loading)
                             const ColoredBox(

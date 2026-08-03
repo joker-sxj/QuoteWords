@@ -35,6 +35,11 @@ decisions agreed for the Android client:
 | Same-day additional study | `7f76084` | `3cac17f` | `flutter test test/study_session_test.dart test/word_study_screen_test.dart test/review_scheduler_test.dart` |
 | Standalone QuoteWords identity | `6321cd6` | `5ee73a7` | `flutter test test/project_identity_test.dart` |
 | Hard 24-card daily ceiling | `4705ade` | `24aa1da` | `flutter test test/study_settings_test.dart` |
+| Preserve credentials from previously paired Android installs | `f385476` | `ed42312` | `flutter test test/project_identity_test.dart` and APK manifest inspection |
+| Immediate card while the catalog refreshes | `b0100d7` | `16a3083` | `flutter test test/vocabulary_catalog_test.dart test/word_study_screen_test.dart` |
+| Parse and cache ISDC Chinese example field `ec` | `e4e7704` | `bcc1bcf` | `flutter test test/isdc_catalog_parser_test.dart test/catalog_adapters_test.dart` |
+| Pass Chinese examples from study data to card rendering | `9087de8` | `d890134` | `flutter test test/word_study_screen_test.dart` |
+| Compact bilingual 296 x 152 card layout | `5babd3c` | `746e6f6` | `flutter test test/word_card_renderer_test.dart` |
 
 Each RED test failed for the intended missing type, method, or behavior before
 its paired production commit. The checkpoint commits remain reachable from
@@ -54,12 +59,15 @@ the standalone repository history.
 | 8 | Only card fields from words with frequency >= 40 are retained | `isdc_catalog_parser_test.dart`, `catalog_adapters_test.dart` | Parser/source integration | PASS |
 | 9 | Fresh cache avoids network and stale cache survives source failure | `vocabulary_catalog_test.dart` | Unit/integration | PASS |
 | 10 | Synchronized words reach rendering, rating persists, and the next card appears | `word_study_screen_test.dart` | Widget integration | PASS |
-| 11 | Long words wrap within 296 x 152 and omit the example when required | `word_card_renderer_test.dart` | Rendering | PASS |
+| 11 | Long words fit within 296 x 152 without truncation or overflow | `word_card_renderer_test.dart` | Rendering | PASS |
 | 12 | Existing image-to-BLE workflow remains available separately | `widget_test.dart`, `word_study_screen_test.dart` | Widget regression | PASS |
+| 13 | Phonetic and Chinese definition share a row, with the Chinese example below English | `word_card_renderer_test.dart` | Rendering | PASS |
+| 14 | Existing Android secure storage remains addressable after the product rename | `project_identity_test.dart` | Build configuration | PASS |
+| 15 | Cached or built-in words render before a slow network refresh completes | `vocabulary_catalog_test.dart`, `word_study_screen_test.dart` | Unit/widget integration | PASS |
 
 ## Final verification
 
-- Full suite after standalone export: `flutter test` -> 46 tests passed.
+- Full suite on 2026-08-03: `flutter test` -> 49 tests passed.
 - Original scoped coverage run: `flutter test --coverage` -> 45 tests passed.
 - Word feature line coverage: 512/613, 83.52%.
 - Whole mobile app line coverage: 1014/1575, 64.38%. Existing BLE and editor
@@ -71,13 +79,16 @@ the standalone repository history.
   accepted licenses. `flutter build apk --debug` produced
   `build/app/outputs/flutter-apk/app-debug.apk`.
 - Formatting and whitespace: `dart format` and `git diff --check` passed.
+- Android 16 emulator: version 1.0.1+2 installed and launched under the legacy
+  package ID; the immediate fallback card showed the compact bilingual layout.
 
 ## Known gaps
 
 - Android 16 emulator smoke testing verified notification permission, schedule
-  persistence, APK launch, first-sync fallback, card rendering, and rating
-  persistence. Real 09:00 delivery, Brotli execution after a complete live
-  download, and BLE upload still require an Android device test.
+  persistence, APK launch, immediate first-sync fallback, bilingual card
+  rendering, and rating persistence. Real 09:00 delivery, credential recovery,
+  Brotli execution after a complete live download, and BLE upload still require
+  an Android device test with the Quote/0.
 - ISDC is a third-party page. Structured parser, cache, and failure behavior are
   tested, but future upstream schema changes can still require an adapter update.
 

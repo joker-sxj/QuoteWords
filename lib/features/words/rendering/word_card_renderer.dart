@@ -100,43 +100,49 @@ Future<ProcessedImage> renderWordCard(WordCardContent content) async {
     color: ink,
   );
   final denseWord = layout.wordLines > 1;
+  final details = [
+    content.phonetic,
+    content.translation,
+  ].where((text) => text.isNotEmpty).join('  ');
   _paintText(
     canvas,
-    content.phonetic,
+    details,
     Offset(13, denseWord ? 69 : 62),
+    maxWidth: 270,
     fontSize: 10.5,
+    weight: FontWeight.w600,
+    color: ink,
+  );
+  final dividerY = denseWord ? 86.0 : 80.0;
+  canvas.drawLine(
+    Offset(12, dividerY),
+    Offset(284, dividerY),
+    Paint()
+      ..color = const Color(0xff777777)
+      ..strokeWidth = 0.75,
+  );
+  _paintText(
+    canvas,
+    content.example,
+    Offset(12, dividerY + 5),
+    maxWidth: 272,
+    maxLines: denseWord ? 1 : 2,
+    fontSize: 9.5,
+    height: 1.1,
     weight: FontWeight.w500,
     color: ink,
   );
   _paintText(
     canvas,
-    content.translation,
-    Offset(12, denseWord ? 88 : 80),
+    content.exampleTranslation,
+    Offset(12, denseWord ? 110 : 112),
     maxWidth: 272,
-    fontSize: 13,
-    weight: FontWeight.w700,
+    maxLines: 2,
+    fontSize: 10,
+    height: 1.1,
+    weight: FontWeight.w600,
     color: ink,
   );
-  if (!denseWord) {
-    canvas.drawLine(
-      const Offset(12, 102),
-      const Offset(284, 102),
-      Paint()
-        ..color = const Color(0xff777777)
-        ..strokeWidth = 0.75,
-    );
-    _paintText(
-      canvas,
-      content.example,
-      const Offset(12, 109),
-      maxWidth: 272,
-      maxLines: 2,
-      fontSize: 10.5,
-      height: 1.2,
-      weight: FontWeight.w500,
-      color: ink,
-    );
-  }
 
   final picture = recorder.endRecording();
   final rendered = await picture.toImage(width, height);
@@ -215,7 +221,7 @@ void _paintText(
     textDirection: TextDirection.ltr,
     textAlign: align,
     maxLines: maxLines,
-    ellipsis: maxLines > 1 ? '…' : null,
+    ellipsis: maxWidth.isFinite ? '…' : null,
     textScaler: TextScaler.noScaling,
   )..layout(maxWidth: maxWidth);
   painter.paint(

@@ -21,7 +21,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = "tech.undef.quotewords"
+        // Keep the original ID so upgrades retain BLE credentials and study data.
+        applicationId = "tech.undef.quoteimage"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
