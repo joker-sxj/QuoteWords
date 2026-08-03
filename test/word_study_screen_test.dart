@@ -164,6 +164,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(rendered.last.word, 'allocate');
+    expect(rendered.last.exampleTranslation, '谨慎地分配资金。');
     expect(rendered.last.position, 1);
     expect(rendered.last.total, 2);
 
@@ -292,6 +293,7 @@ const allocateWord = VocabularyWord(
   phonetic: '/ˈæləkeɪt/',
   translation: 'v. 分配；划拨',
   example: 'Allocate funds carefully.',
+  exampleTranslation: '谨慎地分配资金。',
   frequency: 68,
 );
 
